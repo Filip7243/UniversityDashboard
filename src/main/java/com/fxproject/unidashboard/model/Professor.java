@@ -1,31 +1,51 @@
 package com.fxproject.unidashboard.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
-
-import static jakarta.persistence.GenerationType.IDENTITY;
+import java.util.List;
 
 @Entity
-public class Professor {
+public class Professor extends UniversityMember {
+    @Enumerated(EnumType.STRING)
+    private AcademicTitle academicTitle;
+    @ManyToMany(cascade = CascadeType.ALL)
+    private List<Subject> subjects; // subjects that this professor teaches
+    @ManyToMany(cascade = CascadeType.ALL)
+    private List<Year> years; // years that this professor teaches
 
-    @Id
-    @GeneratedValue(strategy = IDENTITY)
-    private Long id;
-    private String firstName;
-    private String secondName;
-    private String lastName;
-    private String email;
-    private String universityEmail; // @uni.edu.pl
-    private LocalDateTime dateOfBirth;
-    private String placeOfBirth;
-    private String phoneNumber;
-    private String pesel;
-    private LocalDateTime dateOfEmployment;
-    private LocalDateTime createdAt; // time when student acc was created
-    private Boolean isEnabled; // if not enabled, can't login to system
+    public Professor() {
+    }
 
+    public Professor(AcademicTitle academicTitle, List<Subject> subjects, List<Year> years) {
+        this.academicTitle = academicTitle;
+        this.subjects = subjects;
+        this.years = years;
+    }
+
+    public AcademicTitle getAcademicTitle() {
+        return academicTitle;
+    }
+
+    public void setAcademicTitle(AcademicTitle academicTitle) {
+        this.academicTitle = academicTitle;
+    }
+
+    public List<Subject> getSubjects() {
+        return subjects;
+    }
+
+    public void setSubjects(List<Subject> subjects) {
+        this.subjects = subjects;
+    }
+
+    public List<Year> getYears() {
+        return years;
+    }
+
+    public void setYears(List<Year> years) {
+        this.years = years;
+    }
 }

@@ -1,8 +1,8 @@
 package com.fxproject.unidashboard.repository.impl;
 
-import com.fxproject.unidashboard.model.Student;
-import com.fxproject.unidashboard.model.Year;
-import com.fxproject.unidashboard.repository.StudentRepository;
+import com.fxproject.unidashboard.model.UniversityAccount;
+import com.fxproject.unidashboard.model.UniversityMember;
+import com.fxproject.unidashboard.repository.UniversityAccountRepository;
 import com.fxproject.unidashboard.utils.HibernateUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -10,19 +10,20 @@ import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
-public class StudentRepositoryImpl implements StudentRepository {
+public class UniversityAccountRepositoryImpl implements UniversityAccountRepository {
 
     private EntityManager em = HibernateUtils.getEntityManager();
-    private static final String DEFAULT_QUERY = "SELECT s FROM Student s";
+    private static final String DEFAULT_QUERY = "SELECT a FROM UniversityAccount a";
+ // todo: make suer that one member can have one account
 
     @Override
     public void removeWithId(Long id) {
-        Student student = findWithId(id).orElseThrow();// todo: custom exception
+        UniversityAccount universityAccount = findWithId(id).orElseThrow();// todo: custom exception
 
         var transaction = em.getTransaction();
         try {
             transaction.begin();
-            em.remove(student);
+            em.remove(universityAccount);
             transaction.commit();
         } catch (Exception e) {
             transaction.rollback();
@@ -30,12 +31,12 @@ public class StudentRepositoryImpl implements StudentRepository {
     }
 
     @Override
-    public Optional<Student> findWithId(Long id) {
+    public Optional<UniversityAccount> findWithId(Long id) {
         var transaction = em.getTransaction();
         try {
             transaction.begin();
-            TypedQuery<Student> query =
-                    em.createQuery(DEFAULT_QUERY + " WHERE s.id = :id", Student.class);
+            TypedQuery<UniversityAccount> query =
+                    em.createQuery(DEFAULT_QUERY + " WHERE a.id = :id", UniversityAccount.class);
             query.setParameter("id", id);
             transaction.commit();
             return Optional.ofNullable(query.getSingleResult());
@@ -46,11 +47,11 @@ public class StudentRepositoryImpl implements StudentRepository {
     }
 
     @Override
-    public List<Student> findAll() {
+    public List<UniversityAccount> findAll() {
         var transaction = em.getTransaction();
         try {
             transaction.begin();
-            TypedQuery<Student> query = em.createQuery(DEFAULT_QUERY, Student.class);
+            TypedQuery<UniversityAccount> query = em.createQuery(DEFAULT_QUERY, UniversityAccount.class);
             transaction.commit();
             return query.getResultList();
         } catch (Exception e) {
@@ -60,66 +61,66 @@ public class StudentRepositoryImpl implements StudentRepository {
     }
 
     @Override
-    public Optional<Student> findStudentByAlbumId(String albumId) {
+    public Optional<UniversityAccount> findAccountByUniversityEmail(String universityEmail) {
         var transaction = em.getTransaction();
         try {
             transaction.begin();
-            TypedQuery<Student> query =
-                    em.createQuery(DEFAULT_QUERY + " WHERE s.albumId = :albumId", Student.class);
-            query.setParameter("albumId", albumId);
-            transaction.commit();
-            return Optional.ofNullable(query.getSingleResult());
-        } catch (Exception e) {
-            transaction.rollback();
-            return Optional.empty();
-        }
-    }
-
-    @Override
-    public List<Year> findStudentYears(Long id) {
-        var transaction = em.getTransaction();
-        try {
-            transaction.begin();
-            TypedQuery<Year> query = em.createQuery("SELECT s.years FROM Student s WHERE s.id = :id", Year.class);
-            query.setParameter("id", id);
-            transaction.commit();
-            return query.getResultList();
-        } catch (Exception e) {
-            transaction.rollback();
-            return List.of();
-        }
-    }
-
-    @Override
-    public Optional<Student> findStudentByUniversityEmail(String universityEmail) {
-        var transaction = em.getTransaction();
-        try {
-            transaction.begin();
-            TypedQuery<Student> query =
-                    em.createQuery(DEFAULT_QUERY + " WHERE s.universityAccount.universityEmail = :universityEmail", Student.class);
+            TypedQuery<UniversityAccount> query =
+                    em.createQuery(DEFAULT_QUERY + " WHERE a.universityEmail = :universityEmail", UniversityAccount.class);
             query.setParameter("universityEmail", universityEmail);
             transaction.commit();
             return Optional.ofNullable(query.getSingleResult());
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             transaction.rollback();
             return Optional.empty();
         }
     }
 
     @Override
-    public List<Student> findStudentByFirstNameAndLastName(String firstName, String lastName) {
+    public List<UniversityAccount> findAllDisabledAccounts() {
         var transaction = em.getTransaction();
         try {
             transaction.begin();
-            TypedQuery<Student> query =
-                    em.createQuery(DEFAULT_QUERY + " WHERE s.firstName = :firstName AND s.lastName = :lastName", Student.class);
-            query.setParameter("firstName", firstName);
-            query.setParameter("lastName", lastName);
+            TypedQuery<UniversityAccount> query =
+                    em.createQuery(DEFAULT_QUERY + " WHERE a.isEnabled = false", UniversityAccount.class);
             transaction.commit();
             return query.getResultList();
         } catch (Exception e) {
             transaction.rollback();
             return List.of();
+        }
+    }
+
+    @Override
+    public List<UniversityAccount> findAllEnableAccounts() {
+        var transaction = em.getTransaction();
+        try {
+            transaction.begin();
+            TypedQuery<UniversityAccount> query =
+                    em.createQuery(DEFAULT_QUERY + " WHERE a.isEnabled = true", UniversityAccount.class);
+            transaction.commit();
+            return query.getResultList();
+        } catch (Exception e) {
+            transaction.rollback();
+            return List.of();
+        }
+    }
+
+    public Optional<UniversityAccount> findUniversityAccountByMember(UniversityMember member) {
+        var transaction = em.getTransaction();
+
+        try {
+            transaction.begin();
+            TypedQuery<UniversityAccount> query =
+                    em.createQuery(DEFAULT_QUERY + " WHERE a.member = :member", UniversityAccount.class);
+            query.setParameter("member", member);
+            transaction.commit();
+            return Optional.ofNullable(query.getSingleResult());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            transaction.rollback();
+            return Optional.empty();
         }
     }
 }
